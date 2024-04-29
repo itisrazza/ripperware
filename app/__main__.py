@@ -2,6 +2,8 @@ import pygame
 from pages.main_page import MainPage
 from ui import Page, Button
 from state import page_manager
+from ui.colours import COLOR_BACKGROUND
+from util import app_version
 
 DISPLAY_SIZE = DISPLAY_WIDTH, DISPLAY_HEIGHT = 320, 480
 
@@ -13,6 +15,8 @@ if __name__ == "__main__":
 
     page_manager.reset(MainPage())
     page_manager.commit()
+
+    background = "purple" if app_version() == "testmode" else COLOR_BACKGROUND
 
     while running:
         for event in pygame.event.get():
