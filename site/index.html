@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RipperWare Update Server</title>
+    <link rel="preconnect" href="https://rsms.me/" />
+    <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
+    <style>
+      :root {
+        background: #212121;
+        color: white;
+        font-family: "Inter", sans-serif;
+        font-size: 16px;
+      }
+
+      a {
+        color: yellow;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>RipperWare Update Server</h1>
+    <p>
+      This website is used to serve updates for
+      <a href="https://github.com/itisrazza/ripperware">RipperWare</a>, the
+      system software of the
+      <a href="https://razza.io/projects/ripper.html">CD Ripper</a>.
+    </p>
+
+    <table>
+      <tr>
+        <th>Version</th>
+        <td data-bind="version">...</td>
+      </tr>
+      <tr>
+        <th>Archive</th>
+        <td>
+          <a href="..." data-bind="archive">Download</a>
+        </td>
+      </tr>
+    </table>
+
+    <h2>Installing Updates</h2>
+
+    <p>
+      <i>In Wi-Fi Client mode:</i> If the CD ripper is in "Wi-Fi Client" mode
+      and connected to the internet, you can check for updates in the
+      <b>Settings &rarr; Update</b>.
+    </p>
+
+    <p>
+      <i>In Wi-Fi Hotspot mode:</i> Otherwise, download the archive, upload it
+      to the <code>/updates</code> folder, and then navigate to
+      <b>Settings &rarr; Update</b> to apply the changes. You may need to
+      perform platform updates manually when platform changes occur.
+    </p>
+
+    <h2>Note</h2>
+
+    <p>
+      RipperWare is currently in development, with this website supporting a
+      more streamlined development experience, as such the update packages are
+      currently very minimal.
+    </p>
+
+    <p>
+      A more complete installation / updating procedure will be made available
+      down the road.
+    </p>
+
+    <hr />
+
+    <footer>
+      Quickly cobbled together by <a href="https://razza.io">Razza</a> in New
+      Zealand in 2024.
+    </footer>
+
+    <script>
+      /** @type {HTMLElement} */
+      const versionEl = document.querySelector("[data-bind=version]");
+      const archiveEl = document.querySelector("[data-bind=archive]");
+
+      (async function () {
+        const response = await fetch("version.txt");
+        const text = await response.text();
+
+        versionEl.innerText = text;
+        archiveEl.setAttribute("href", `ripperware-${text}.tar.gz`);
+      })();
+    </script>
+  </body>
+</html>
