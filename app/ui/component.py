@@ -2,9 +2,9 @@ from typing import Protocol, runtime_checkable
 
 from pygame import Surface
 
-type BBox = tuple[int, int, int, int]
-type Size = tuple[int | None, int | None]
-type Point = tuple[int, int]
+BBox = tuple[int, int, int, int]
+Size = tuple[int | None, int | None]
+Point = tuple[int, int]
 
 
 @runtime_checkable

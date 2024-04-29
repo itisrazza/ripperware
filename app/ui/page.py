@@ -35,8 +35,39 @@ class Page:
         return None
 
     def render(self, target: Surface):
-        for item, bbox in self._perform_layout(target.get_size()):
+        for item, bbox in reversed(self._perform_layout(target.get_size())):
             item.render(target, bbox)
+
+    def get_content_height(self, size: tuple[int, int]) -> tuple[int, int]:
+        layout_width, layout_height = size
+
+        layout_y_pos = 0
+        for item in self.leading_items:
+            item_width, item_height = item.size()
+            item_width = ifnone(item_width, layout_width)
+            item_height = ifnone(item_height, 0)
+
+            layout_y_pos += item_height
+        items_layout_top = layout_y_pos
+
+        layout_y_pos = layout_height
+        for item in reversed(self.trailing_items):
+            item_width, item_height = item.size()
+            item_width = ifnone(item_width, layout_width)
+            item_height = ifnone(item_height, 0)
+
+            layout_y_pos -= item_height
+        items_layout_bottom = layout_y_pos
+
+        layout_y_pos = 0
+        for item in self.items:
+            item_width, item_height = item.size()
+            item_width = ifnone(item_width, layout_width)
+            item_height = ifnone(item_height, 0)
+
+            layout_y_pos += item_height
+
+        return (layout_y_pos, items_layout_bottom - items_layout_top)
 
     def _perform_layout(self, size: tuple[int, int]) -> list[tuple[Component, BBox]]:
         layout_width, layout_height = size
@@ -66,11 +97,15 @@ class Page:
             layout.append((item, (0, layout_y_pos, item_width, item_height)))
         items_layout_bottom = layout_y_pos
 
-        layout_y_pos = items_layout_top
+        layout_y_pos = items_layout_top - self.scroll_offset
         for item in self.items:
             item_width, item_height = item.size()
             item_width = ifnone(item_width, layout_width)
             item_height = ifnone(item_height, 0)
+            
+            if layout_y_pos + item_height < items_layout_top or layout_y_pos > items_layout_bottom:
+                layout_y_pos += item_height
+                continue
 
             layout.append((item, (0, layout_y_pos, item_width, item_height)))
             layout_y_pos += item_height

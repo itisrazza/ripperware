@@ -54,8 +54,11 @@ class PageManager:
 
 
 class PageState:
+    _SCROLL_OFFSET_THRES = 8
+
     def __init__(self) -> None:
-        self.mouse_down: bool = False
+        self.mouse_down: Point | bool = False
+        self.scroll_offset_start: int | None = None
         self.mouse_over_item: Component | None = None
 
     @abstractmethod
@@ -88,23 +91,44 @@ class PageState:
         button -- whether mouse button is "down" / "up"
         """
 
+        ignore_mouse_input = False
+
         if button == "down":
-            self.mouse_down = True
+            self.mouse_down = point
         elif button == "up":
             self.mouse_down = False
 
-        if self.mouse_down:
-            item_under_mouse = self.get_page().point_to(point, view_size)
-            if self.mouse_over_item is not None:
-                self.mouse_over_item.active = False
+        page = self.get_page()
+        if page.scrollable and self.mouse_down:
+            if self.scroll_offset_start is None:
+                self.scroll_offset_start = page.scroll_offset
 
-            self.mouse_over_item = item_under_mouse
-            if self.mouse_over_item is not None:
-                self.mouse_over_item.active = True
+            content_height, view_height = page.get_content_height(view_size)
 
-            print(f"item_under_mouse={item_under_mouse}")
-        else:
-            if self.mouse_over_item is not None:
-                self.mouse_over_item.active = False
-                self.mouse_over_item.do_action()
-            self.mouse_over_item = None
+            offset = self.mouse_down[1] - point[1]
+            if abs(offset) >= 8:
+                page.scroll_offset = self.scroll_offset_start + offset
+                if self.mouse_over_item is not None:
+                    self.mouse_over_item.active = False
+                self.mouse_over_item = None
+                ignore_mouse_input = True
+
+            if page.scroll_offset < 0:
+                page.scroll_offset = 0
+            if page.scroll_offset > content_height - view_height:
+                page.scroll_offset = content_height - view_height
+
+        if not ignore_mouse_input:
+            if self.mouse_down != False:
+                item_under_mouse = page.point_to(point, view_size)
+                if self.mouse_over_item is not None:
+                    self.mouse_over_item.active = False
+
+                self.mouse_over_item = item_under_mouse
+                if self.mouse_over_item is not None:
+                    self.mouse_over_item.active = True
+            else:
+                if self.mouse_over_item is not None:
+                    self.mouse_over_item.active = False
+                    self.mouse_over_item.do_action()
+                self.mouse_over_item = None
